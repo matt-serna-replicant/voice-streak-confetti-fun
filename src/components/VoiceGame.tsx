@@ -136,6 +136,7 @@ export function VoiceGame() {
         // Shuffle the clips for random order
         const shuffledClips = allClips.sort(() => Math.random() - 0.5);
         setVoiceClips(shuffledClips);
+        console.log('Clips set, first clip:', shuffledClips[0]);
       } else {
         toast({
           title: "No audio files found",
@@ -410,7 +411,7 @@ export function VoiceGame() {
             <div className="mb-8">
               <Button
                 onClick={playClip}
-                disabled={isPlaying}
+                disabled={isPlaying || loading || !currentClip}
                 size="lg"
                 className="w-32 h-32 rounded-full bg-gradient-primary hover:scale-105 transition-transform shadow-game"
               >
