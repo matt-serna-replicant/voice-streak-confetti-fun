@@ -188,39 +188,6 @@ export function VoiceGame() {
     }
 
     console.log('Attempting to play audio:', currentClip.audio_url);
-
-    // Check if user has interacted with page (required for audio autoplay)
-    if (!userHasInteracted) {
-      toast({
-        title: "Click Required",
-        description: "Please click anywhere on the page first to enable audio",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // First, let's test if the file is accessible
-    try {
-      const response = await fetch(currentClip.audio_url, { method: 'HEAD' });
-      console.log('File accessibility check:', response.status, response.headers.get('content-type'));
-      
-      if (!response.ok) {
-        toast({
-          title: "File Access Error",
-          description: `Cannot access audio file (${response.status}). Check if the file exists in storage.`,
-          variant: "destructive",
-        });
-        return;
-      }
-    } catch (error) {
-      console.error('File accessibility error:', error);
-      toast({
-        title: "Network Error",
-        description: "Cannot reach the audio file. Check your internet connection.",
-        variant: "destructive",
-      });
-      return;
-    }
     
     setIsPlaying(true);
     
