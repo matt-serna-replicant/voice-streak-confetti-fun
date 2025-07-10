@@ -2,41 +2,65 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+/* Guess the Voice - Design System 
 All colors MUST be HSL.
 */
 
+@import url('https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&display=swap');
+
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
+    /* Game Brand Colors */
+    --brand-primary: 233 82% 60%; /* #2e56ff */
+    --brand-secondary: 189 95% 52%; /* #08eeff */
+    --brand-success: 142 76% 36%; /* #22c55e */
+    --brand-error: 0 84% 60%; /* #ef4444 */
+    
+    /* Core System Colors */
+    --background: 0 0% 96%; /* #f5f5f5 */
+    --foreground: 222 84% 5%;
+    
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
+    --card-foreground: 222 84% 5%;
+    
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
+    --popover-foreground: 222 84% 5%;
+    
+    --primary: 233 82% 60%; /* Brand primary */
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    
+    --muted: 210 40% 95%;
+    --muted-foreground: 215 16% 47%;
+    
+    --accent: 189 95% 52%; /* Brand secondary */
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+    
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 233 82% 60%;
+    
+    --radius: 0.75rem; /* 12px rounded corners */
+    
+    /* Game-specific design tokens */
+    --gradient-primary: linear-gradient(135deg, hsl(233 82% 60%), hsl(189 95% 52%));
+    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(0 0% 98%));
+    --shadow-game: 0 10px 30px -10px hsl(233 82% 60% / 0.2);
+    --shadow-card: 0 4px 20px -4px hsl(0 0% 0% / 0.1);
+    --transition-game: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Animation values */
+    --duration-quick: 200ms;
+    --duration-smooth: 350ms;
+    --ease-game: cubic-bezier(0.4, 0, 0.2, 1);
 
     --sidebar-background: 0 0% 98%;
 
@@ -100,6 +124,59 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-jost;
   }
+}
+
+@layer components {
+  /* Game-specific component styles */
+  .game-button {
+    @apply transition-all duration-[350ms] ease-out;
+  }
+  
+  .game-button:hover {
+    @apply scale-105;
+  }
+  
+  .game-button:active {
+    @apply scale-95;
+  }
+  
+  .streak-badge {
+    @apply bg-gradient-to-r from-orange-400 to-red-500 text-white;
+  }
+  
+  .confetti-burst {
+    @apply animate-bounce;
+  }
+  
+  .shake-animation {
+    animation: shake 0.3s ease-in-out;
+  }
+  
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
+  
+  @keyframes confetti-pop {
+    0% { 
+      transform: scale(0) rotate(0deg);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.2) rotate(180deg);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1) rotate(360deg);
+      opacity: 0;
+    }
+  }
+  
+  .confetti-particle {
+    animation: confetti-pop 1s ease-out forwards;
+  }
+}
 }
