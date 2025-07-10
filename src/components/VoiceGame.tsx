@@ -59,10 +59,10 @@ export function VoiceGame() {
 
   const loadVoiceClips = async () => {
     try {
-      // Load files from both AI and human voice folders
+      // Load files from both AI and human voice folders (updated folder names)
       const [aiVoicesResult, humanVoicesResult] = await Promise.all([
-        supabase.storage.from('voice-clips').list('AI voices'),
-        supabase.storage.from('voice-clips').list('human voices')
+        supabase.storage.from('voice-clips').list('AI-voices'),
+        supabase.storage.from('voice-clips').list('human-voices')
       ]);
 
       if (aiVoicesResult.error) throw aiVoicesResult.error;
@@ -80,7 +80,7 @@ export function VoiceGame() {
         });
         
         aiAudioFiles.forEach((file, index) => {
-          const fullPath = `AI voices/${file.name}`;
+          const fullPath = `AI-voices/${file.name}`;
           const fileName = file.name.replace(/\.[^/.]+$/, ''); // Remove file extension
           
           // Get public URL for the audio file with proper encoding
@@ -113,7 +113,7 @@ export function VoiceGame() {
         });
         
         humanAudioFiles.forEach((file, index) => {
-          const fullPath = `human voices/${file.name}`;
+          const fullPath = `human-voices/${file.name}`;
           const fileName = file.name.replace(/\.[^/.]+$/, ''); // Remove file extension
           
           // Get public URL for the audio file with proper encoding
@@ -146,7 +146,7 @@ export function VoiceGame() {
       } else {
         toast({
           title: "No audio files found",
-          description: "Upload audio files to 'AI voices' and 'human voices' folders!",
+          description: "Upload audio files to 'AI-voices' and 'human-voices' folders!",
           variant: "destructive",
         });
       }
