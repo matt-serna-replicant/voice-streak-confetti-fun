@@ -232,9 +232,11 @@ export function VoiceGame() {
         
         const onError = (e: Event) => {
           console.error('Audio loading error:', e);
+          console.error('Audio error details:', audio.error);
+          console.error('Audio src that failed:', audio.src);
           audio.removeEventListener('canplay', onCanPlay);
           audio.removeEventListener('error', onError);
-          reject(new Error('Failed to load audio'));
+          reject(new Error(`Failed to load audio: ${audio.error?.message || 'Unknown error'}`));
         };
         
         audio.addEventListener('canplay', onCanPlay, { once: true });
