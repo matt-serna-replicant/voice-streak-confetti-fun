@@ -7,29 +7,18 @@ import { Volume2, Play, RotateCcw, User, Bot, Flame } from 'lucide-react';
 import { Confetti } from './Confetti';
 import { ResultsModal } from './ResultsModal';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface VoiceClip {
   id: string;
-  url: string;
-  isAI: boolean;
+  title: string;
   description: string;
+  is_ai: boolean;
+  audio_url: string;
 }
 
-// Mock voice clips for demo
-const mockClips: VoiceClip[] = [
-  { id: '1', url: '#', isAI: false, description: 'Professional narrator' },
-  { id: '2', url: '#', isAI: true, description: 'AI-generated voice' },
-  { id: '3', url: '#', isAI: false, description: 'Podcast host' },
-  { id: '4', url: '#', isAI: true, description: 'Synthetic speech' },
-  { id: '5', url: '#', isAI: false, description: 'Voice actor' },
-  { id: '6', url: '#', isAI: true, description: 'Text-to-speech' },
-  { id: '7', url: '#', isAI: false, description: 'Radio presenter' },
-  { id: '8', url: '#', isAI: true, description: 'AI clone voice' },
-  { id: '9', url: '#', isAI: false, description: 'Audiobook reader' },
-  { id: '10', url: '#', isAI: true, description: 'Generated audio' },
-];
-
 export function VoiceGame() {
+  const [voiceClips, setVoiceClips] = useState<VoiceClip[]>([]);
   const [currentClipIndex, setCurrentClipIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [currentStreak, setCurrentStreak] = useState(0);
@@ -40,13 +29,50 @@ export function VoiceGame() {
   const [replaysUsed, setReplaysUsed] = useState(0);
   const [showResults, setShowResults] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [loading, setLoading] = useState(true);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
 
-  const currentClip = mockClips[currentClipIndex];
+  // Load voice clips from Supabase
+  useEffect(() => {
+    loadVoiceClips();
+  }, []);
+
+  const loadVoiceClips = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('voice_clips')
+        .select('*')
+        .order('created_at');
+
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        setVoiceClips(data);
+      } else {
+        // Fallback to demo message if no clips
+        toast({
+          title: "No audio clips found",
+          description: "Upload some voice clips to start playing!",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error loading voice clips:', error);
+      toast({
+        title: "Error loading clips",
+        description: "Using demo mode",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const currentClip = voiceClips[currentClipIndex];
   const maxReplays = 3;
-  const totalClips = 10;
+  const totalClips = voiceClips.length || 10;
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -95,7 +121,8 @@ export function VoiceGame() {
   };
 
   const handleGuess = (guessedAI: boolean) => {
-    const isCorrect = guessedAI === currentClip.isAI;
+    if (!currentClip) return;
+    const isCorrect = guessedAI === currentClip.is_ai;
     
     if (isCorrect) {
       // Correct guess
@@ -111,7 +138,7 @@ export function VoiceGame() {
       
       toast({
         title: "Correct! 🎉",
-        description: `${currentClip.isAI ? 'AI' : 'Human'} voice detected`,
+        description: `${currentClip.is_ai ? 'AI' : 'Human'} voice detected`,
       });
 
       setTimeout(() => setShowConfetti(false), 1000);
@@ -124,7 +151,7 @@ export function VoiceGame() {
       
       toast({
         title: "Incorrect",
-        description: `That was a ${currentClip.isAI ? 'AI' : 'Human'} voice`,
+        description: `That was a ${currentClip.is_ai ? 'AI' : 'Human'} voice`,
         variant: "destructive",
       });
 
@@ -199,7 +226,7 @@ export function VoiceGame() {
           <div className="text-center">
             <div className="mb-6">
               <h2 className="text-xl font-semibold mb-2">Listen to this voice:</h2>
-              <p className="text-muted-foreground">{currentClip.description}</p>
+              <p className="text-muted-foreground">{currentClip?.description || 'Loading...'}</p>
             </div>
 
             {/* Audio Player */}
