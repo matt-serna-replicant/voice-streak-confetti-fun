@@ -192,80 +192,63 @@ export function VoiceGame() {
     setIsPlaying(true);
     
     try {
-      // Stop any currently playing audio
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-        audioRef.current.removeEventListener('ended', () => {});
-        audioRef.current.removeEventListener('error', () => {});
+      // Create or reuse audio element
+      if (!audioRef.current) {
+        audioRef.current = new Audio();
       }
       
-      // Create new audio element
-      const audio = new Audio();
-      audioRef.current = audio;
+      const audio = audioRef.current;
       
-      // Set up event listeners before setting src
-      audio.addEventListener('ended', () => {
-        setIsPlaying(false);
-      });
+      // Complete cleanup and reset
+      audio.pause();
+      audio.currentTime = 0;
+      audio.src = '';
+      audio.load(); // This clears the audio element completely
       
-      audio.addEventListener('error', (e) => {
-        console.error('Audio error:', e);
-        setIsPlaying(false);
-        toast({
-          title: "Audio Error",
-          description: `Could not load audio file: ${audio.error?.message || 'Unknown error'}`,
-          variant: "destructive",
-        });
-      });
-
-      audio.addEventListener('loadstart', () => {
-        console.log('Audio loading started for:', currentClip.audio_url);
-      });
-
-      audio.addEventListener('canplay', () => {
-        console.log('Audio can start playing');
-      });
+      // Set up the audio for the new clip
+      audio.preload = 'metadata'; // Use metadata instead of auto for better performance
+      // Remove crossOrigin - let Supabase handle CORS naturally
       
-      // Set audio properties for better compatibility
-      audio.preload = 'auto';
-      audio.crossOrigin = 'anonymous';
-      
-      // Set the source URL
-      console.log('Setting audio source to:', currentClip.audio_url);
-      audio.src = currentClip.audio_url;
-      
-      // Load the audio first, then try to play after a small delay
-      audio.load();
-      
-      // Add a small delay to let the audio load
-      setTimeout(async () => {
-        try {
-          await audio.play();
-          console.log('Audio playback started successfully');
-        } catch (playError) {
-          console.error('Audio play error:', playError);
-          setIsPlaying(false);
+      // Create a promise to handle audio loading and playing
+      const playAudio = new Promise<void>((resolve, reject) => {
+        const onCanPlay = () => {
+          console.log('Audio can play, starting playback');
+          audio.removeEventListener('canplay', onCanPlay);
+          audio.removeEventListener('error', onError);
           
-          let errorMessage = "Could not start audio playback";
-          if (playError instanceof Error) {
-            if (playError.name === 'NotAllowedError') {
-              errorMessage = "Audio blocked by browser. Click anywhere first to enable audio";
-            } else if (playError.name === 'NotSupportedError') {
-              errorMessage = "Audio format not supported by your browser";
-            } else {
-              errorMessage = `Playback failed: ${playError.message}`;
-            }
-          }
-          
-          toast({
-            title: "Playback Error", 
-            description: errorMessage,
-            variant: "destructive",
-          });
-        }
-      }, 100);
-
+          audio.play()
+            .then(() => {
+              console.log('Audio playback started successfully');
+              resolve();
+            })
+            .catch(reject);
+        };
+        
+        const onError = (e: Event) => {
+          console.error('Audio loading error:', e);
+          audio.removeEventListener('canplay', onCanPlay);
+          audio.removeEventListener('error', onError);
+          reject(new Error('Failed to load audio'));
+        };
+        
+        audio.addEventListener('canplay', onCanPlay, { once: true });
+        audio.addEventListener('error', onError, { once: true });
+        
+        // Set source and start loading
+        audio.src = currentClip.audio_url;
+      });
+      
+      // Set up the ended event listener
+      const onEnded = () => {
+        console.log('Audio playback ended');
+        setIsPlaying(false);
+        audio.removeEventListener('ended', onEnded);
+      };
+      audio.addEventListener('ended', onEnded, { once: true });
+      
+      // Wait for audio to be ready and play
+      await playAudio;
+      
       // Update replay count
       if (replaysUsed === 0) {
         // First play is free
@@ -277,15 +260,12 @@ export function VoiceGame() {
       console.error('Playback error:', error);
       setIsPlaying(false);
       
-      // Provide more specific error messages
-      let errorMessage = "Could not start audio playback";
+      let errorMessage = "Could not play audio";
       if (error instanceof Error) {
         if (error.name === 'NotAllowedError') {
-          errorMessage = "Audio blocked by browser. Please click to enable audio";
-        } else if (error.name === 'NotSupportedError') {
-          errorMessage = "Audio format not supported";
-        } else if (error.name === 'AbortError') {
-          errorMessage = "Audio playback was interrupted";
+          errorMessage = "Please click anywhere on the page first to enable audio";
+        } else if (error.message.includes('Failed to load')) {
+          errorMessage = "Audio file could not be loaded. Try refreshing the page.";
         } else {
           errorMessage = `Playback failed: ${error.message}`;
         }
