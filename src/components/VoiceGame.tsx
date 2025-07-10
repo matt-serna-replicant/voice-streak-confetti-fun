@@ -30,9 +30,27 @@ export function VoiceGame() {
   const [showResults, setShowResults] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [userHasInteracted, setUserHasInteracted] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
+
+  // Track user interaction for audio playback
+  useEffect(() => {
+    const handleUserInteraction = () => {
+      setUserHasInteracted(true);
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('keydown', handleUserInteraction);
+    };
+
+    document.addEventListener('click', handleUserInteraction);
+    document.addEventListener('keydown', handleUserInteraction);
+
+    return () => {
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('keydown', handleUserInteraction);
+    };
+  }, []);
 
   // Load voice clips from Supabase storage
   useEffect(() => {
@@ -155,47 +173,104 @@ export function VoiceGame() {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [currentClipIndex, replaysUsed]);
 
-  const playClip = () => {
-    if (!currentClip?.audio_url) return;
+  const playClip = async () => {
+    if (!currentClip?.audio_url) {
+      toast({
+        title: "No Audio",
+        description: "No audio file available for this clip",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if user has interacted with page (required for audio autoplay)
+    if (!userHasInteracted) {
+      toast({
+        title: "Click Required",
+        description: "Please click anywhere on the page first to enable audio",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsPlaying(true);
     
-    // Stop any currently playing audio
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-    
-    // Create new audio element and play
-    const audio = new Audio(currentClip.audio_url);
-    audioRef.current = audio;
-    
-    audio.onended = () => {
-      setIsPlaying(false);
-    };
-    
-    audio.onerror = () => {
-      setIsPlaying(false);
-      toast({
-        title: "Audio Error",
-        description: "Could not play the audio file",
-        variant: "destructive",
+    try {
+      // Stop any currently playing audio
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        audioRef.current.removeEventListener('ended', () => {});
+        audioRef.current.removeEventListener('error', () => {});
+      }
+      
+      // Create new audio element
+      const audio = new Audio();
+      audioRef.current = audio;
+      
+      // Set up event listeners before setting src
+      audio.addEventListener('ended', () => {
+        setIsPlaying(false);
       });
-    };
-    
-    audio.play().catch(() => {
+      
+      audio.addEventListener('error', (e) => {
+        console.error('Audio error:', e);
+        setIsPlaying(false);
+        toast({
+          title: "Audio Error",
+          description: `Could not load audio file: ${audio.error?.message || 'Unknown error'}`,
+          variant: "destructive",
+        });
+      });
+
+      audio.addEventListener('loadstart', () => {
+        console.log('Audio loading started for:', currentClip.audio_url);
+      });
+
+      audio.addEventListener('canplay', () => {
+        console.log('Audio can start playing');
+      });
+      
+      // Set audio properties
+      audio.preload = 'auto';
+      audio.crossOrigin = 'anonymous';
+      audio.src = currentClip.audio_url;
+      
+      // Try to play the audio
+      await audio.play();
+      
+      console.log('Audio playback started successfully');
+
+      // Update replay count
+      if (replaysUsed === 0) {
+        // First play is free
+      } else {
+        setReplaysUsed(prev => prev + 1);
+      }
+      
+    } catch (error) {
+      console.error('Playback error:', error);
       setIsPlaying(false);
+      
+      // Provide more specific error messages
+      let errorMessage = "Could not start audio playback";
+      if (error instanceof Error) {
+        if (error.name === 'NotAllowedError') {
+          errorMessage = "Audio blocked by browser. Please click to enable audio";
+        } else if (error.name === 'NotSupportedError') {
+          errorMessage = "Audio format not supported";
+        } else if (error.name === 'AbortError') {
+          errorMessage = "Audio playback was interrupted";
+        } else {
+          errorMessage = `Playback failed: ${error.message}`;
+        }
+      }
+      
       toast({
         title: "Playback Error", 
-        description: "Could not start audio playback",
+        description: errorMessage,
         variant: "destructive",
       });
-    });
-
-    if (replaysUsed === 0) {
-      // First play is free
-    } else {
-      setReplaysUsed(prev => prev + 1);
     }
   };
 
