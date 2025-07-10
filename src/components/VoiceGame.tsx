@@ -248,10 +248,8 @@ export function VoiceGame() {
         audio.addEventListener('canplay', onCanPlay, { once: true });
         audio.addEventListener('error', onError, { once: true });
         
-        // Set source and start loading - try with a slight delay to help browser handle the URL
-        setTimeout(() => {
-          audio.src = currentClip.audio_url;
-        }, 50);
+        // Set source and start loading
+        audio.src = currentClip.audio_url;
       });
       
       // Set up the ended event listener
