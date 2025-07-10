@@ -83,19 +83,22 @@ export function VoiceGame() {
           const fullPath = `AI voices/${file.name}`;
           const fileName = file.name.replace(/\.[^/.]+$/, ''); // Remove file extension
           
-          // Get public URL for the audio file
+          // Get public URL for the audio file with proper encoding
           const { data: { publicUrl } } = supabase.storage
             .from('voice-clips')
             .getPublicUrl(fullPath);
           
-          console.log('AI file loaded:', fileName, 'URL:', publicUrl);
+          // Keep the properly encoded URL from Supabase
+          const cleanUrl = publicUrl;
+          
+          console.log('AI file loaded:', fileName, 'URL:', cleanUrl);
           
           allClips.push({
             id: `ai-clip-${index}`,
             title: fileName,
             description: `AI voice sample`,
             is_ai: true,
-            audio_url: publicUrl
+            audio_url: cleanUrl
           });
         });
       }
@@ -113,19 +116,22 @@ export function VoiceGame() {
           const fullPath = `human voices/${file.name}`;
           const fileName = file.name.replace(/\.[^/.]+$/, ''); // Remove file extension
           
-          // Get public URL for the audio file
+          // Get public URL for the audio file with proper encoding
           const { data: { publicUrl } } = supabase.storage
             .from('voice-clips')
             .getPublicUrl(fullPath);
           
-          console.log('Human file loaded:', fileName, 'URL:', publicUrl);
+          // Keep the properly encoded URL from Supabase  
+          const cleanUrl = publicUrl;
+          
+          console.log('Human file loaded:', fileName, 'URL:', cleanUrl);
           
           allClips.push({
             id: `human-clip-${index}`,
             title: fileName,
             description: `Human voice sample`,
             is_ai: false,
-            audio_url: publicUrl
+            audio_url: cleanUrl
           });
         });
       }
@@ -242,8 +248,10 @@ export function VoiceGame() {
         audio.addEventListener('canplay', onCanPlay, { once: true });
         audio.addEventListener('error', onError, { once: true });
         
-        // Set source and start loading
-        audio.src = currentClip.audio_url;
+        // Set source and start loading - try with a slight delay to help browser handle the URL
+        setTimeout(() => {
+          audio.src = currentClip.audio_url;
+        }, 50);
       });
       
       // Set up the ended event listener
