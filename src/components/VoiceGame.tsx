@@ -178,10 +178,15 @@ export function VoiceGame() {
   }, [currentClipIndex, replaysUsed]);
 
   const playClip = async () => {
+    console.log('playClip called. currentClipIndex:', currentClipIndex);
+    console.log('voiceClips length:', voiceClips.length);
+    console.log('currentClip:', currentClip);
+    console.log('currentClip?.audio_url:', currentClip?.audio_url);
+    
     if (!currentClip?.audio_url) {
       toast({
         title: "No Audio",
-        description: "No audio file available for this clip",
+        description: `No audio file available for this clip. Debug: clipIndex=${currentClipIndex}, totalClips=${voiceClips.length}`,
         variant: "destructive",
       });
       return;
