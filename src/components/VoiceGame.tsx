@@ -34,27 +34,90 @@ export function VoiceGame() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
 
-  // Load voice clips from Supabase
+  // Load voice clips from Supabase storage
   useEffect(() => {
     loadVoiceClips();
   }, []);
 
   const loadVoiceClips = async () => {
     try {
-      const { data, error } = await supabase
-        .from('voice_clips')
-        .select('*')
-        .order('created_at');
+      // Load files from both AI and human voice folders
+      const [aiVoicesResult, humanVoicesResult] = await Promise.all([
+        supabase.storage.from('voice-clips').list('AI voices'),
+        supabase.storage.from('voice-clips').list('human voices')
+      ]);
 
-      if (error) throw error;
+      if (aiVoicesResult.error) throw aiVoicesResult.error;
+      if (humanVoicesResult.error) throw humanVoicesResult.error;
       
-      if (data && data.length > 0) {
-        setVoiceClips(data);
+      const allClips: VoiceClip[] = [];
+      
+      // Process AI voice files
+      if (aiVoicesResult.data) {
+        const aiAudioFiles = aiVoicesResult.data.filter(file => 
+          file.name.includes('.') && 
+          (file.name.toLowerCase().includes('.mp3') || 
+           file.name.toLowerCase().includes('.wav') || 
+           file.name.toLowerCase().includes('.m4a') ||
+           file.name.toLowerCase().includes('.ogg'))
+        );
+        
+        aiAudioFiles.forEach((file, index) => {
+          const fullPath = `AI voices/${file.name}`;
+          const fileName = file.name.replace(/\.[^/.]+$/, ''); // Remove file extension
+          
+          // Get public URL for the audio file
+          const { data: { publicUrl } } = supabase.storage
+            .from('voice-clips')
+            .getPublicUrl(fullPath);
+          
+          allClips.push({
+            id: `ai-clip-${index}`,
+            title: fileName,
+            description: `AI voice sample`,
+            is_ai: true,
+            audio_url: publicUrl
+          });
+        });
+      }
+      
+      // Process human voice files
+      if (humanVoicesResult.data) {
+        const humanAudioFiles = humanVoicesResult.data.filter(file => 
+          file.name.includes('.') && 
+          (file.name.toLowerCase().includes('.mp3') || 
+           file.name.toLowerCase().includes('.wav') || 
+           file.name.toLowerCase().includes('.m4a') ||
+           file.name.toLowerCase().includes('.ogg'))
+        );
+        
+        humanAudioFiles.forEach((file, index) => {
+          const fullPath = `human voices/${file.name}`;
+          const fileName = file.name.replace(/\.[^/.]+$/, ''); // Remove file extension
+          
+          // Get public URL for the audio file
+          const { data: { publicUrl } } = supabase.storage
+            .from('voice-clips')
+            .getPublicUrl(fullPath);
+          
+          allClips.push({
+            id: `human-clip-${index}`,
+            title: fileName,
+            description: `Human voice sample`,
+            is_ai: false,
+            audio_url: publicUrl
+          });
+        });
+      }
+      
+      if (allClips.length > 0) {
+        // Shuffle the clips for random order
+        const shuffledClips = allClips.sort(() => Math.random() - 0.5);
+        setVoiceClips(shuffledClips);
       } else {
-        // Fallback to demo message if no clips
         toast({
-          title: "No audio clips found",
-          description: "Upload some voice clips to start playing!",
+          title: "No audio files found",
+          description: "Upload audio files to 'AI voices' and 'human voices' folders!",
           variant: "destructive",
         });
       }
@@ -62,7 +125,7 @@ export function VoiceGame() {
       console.error('Error loading voice clips:', error);
       toast({
         title: "Error loading clips",
-        description: "Using demo mode",
+        description: "Check your storage setup",
         variant: "destructive",
       });
     } finally {
@@ -93,12 +156,41 @@ export function VoiceGame() {
   }, [currentClipIndex, replaysUsed]);
 
   const playClip = () => {
+    if (!currentClip?.audio_url) return;
+    
     setIsPlaying(true);
     
-    // Simulate audio playback for demo
-    setTimeout(() => {
+    // Stop any currently playing audio
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    
+    // Create new audio element and play
+    const audio = new Audio(currentClip.audio_url);
+    audioRef.current = audio;
+    
+    audio.onended = () => {
       setIsPlaying(false);
-    }, 2000);
+    };
+    
+    audio.onerror = () => {
+      setIsPlaying(false);
+      toast({
+        title: "Audio Error",
+        description: "Could not play the audio file",
+        variant: "destructive",
+      });
+    };
+    
+    audio.play().catch(() => {
+      setIsPlaying(false);
+      toast({
+        title: "Playback Error", 
+        description: "Could not start audio playback",
+        variant: "destructive",
+      });
+    });
 
     if (replaysUsed === 0) {
       // First play is free
