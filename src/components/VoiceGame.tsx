@@ -227,15 +227,44 @@ export function VoiceGame() {
         console.log('Audio can start playing');
       });
       
-      // Set audio properties
+      // Set audio properties for better compatibility
       audio.preload = 'auto';
       audio.crossOrigin = 'anonymous';
+      
+      // Set the source URL
+      console.log('Setting audio source to:', currentClip.audio_url);
       audio.src = currentClip.audio_url;
       
-      // Try to play the audio
-      await audio.play();
+      // Load the audio first, then try to play after a small delay
+      audio.load();
       
-      console.log('Audio playback started successfully');
+      // Add a small delay to let the audio load
+      setTimeout(async () => {
+        try {
+          await audio.play();
+          console.log('Audio playback started successfully');
+        } catch (playError) {
+          console.error('Audio play error:', playError);
+          setIsPlaying(false);
+          
+          let errorMessage = "Could not start audio playback";
+          if (playError instanceof Error) {
+            if (playError.name === 'NotAllowedError') {
+              errorMessage = "Audio blocked by browser. Click anywhere first to enable audio";
+            } else if (playError.name === 'NotSupportedError') {
+              errorMessage = "Audio format not supported by your browser";
+            } else {
+              errorMessage = `Playback failed: ${playError.message}`;
+            }
+          }
+          
+          toast({
+            title: "Playback Error", 
+            description: errorMessage,
+            variant: "destructive",
+          });
+        }
+      }, 100);
 
       // Update replay count
       if (replaysUsed === 0) {
