@@ -72,13 +72,12 @@ export function VoiceGame() {
       
       // Process AI voice files
       if (aiVoicesResult.data) {
-        const aiAudioFiles = aiVoicesResult.data.filter(file => 
-          file.name.includes('.') && 
-          (file.name.toLowerCase().includes('.mp3') || 
-           file.name.toLowerCase().includes('.wav') || 
-           file.name.toLowerCase().includes('.m4a') ||
-           file.name.toLowerCase().includes('.ogg'))
-        );
+        const aiAudioFiles = aiVoicesResult.data.filter(file => {
+          const fileName = file.name.toLowerCase();
+          const supportedFormats = ['.mp3', '.wav', '.m4a', '.ogg', '.webm', '.aac'];
+          return file.name.includes('.') && 
+                 supportedFormats.some(format => fileName.endsWith(format));
+        });
         
         aiAudioFiles.forEach((file, index) => {
           const fullPath = `AI voices/${file.name}`;
@@ -101,13 +100,12 @@ export function VoiceGame() {
       
       // Process human voice files
       if (humanVoicesResult.data) {
-        const humanAudioFiles = humanVoicesResult.data.filter(file => 
-          file.name.includes('.') && 
-          (file.name.toLowerCase().includes('.mp3') || 
-           file.name.toLowerCase().includes('.wav') || 
-           file.name.toLowerCase().includes('.m4a') ||
-           file.name.toLowerCase().includes('.ogg'))
-        );
+        const humanAudioFiles = humanVoicesResult.data.filter(file => {
+          const fileName = file.name.toLowerCase();
+          const supportedFormats = ['.mp3', '.wav', '.m4a', '.ogg', '.webm', '.aac'];
+          return file.name.includes('.') && 
+                 supportedFormats.some(format => fileName.endsWith(format));
+        });
         
         humanAudioFiles.forEach((file, index) => {
           const fullPath = `human voices/${file.name}`;
@@ -173,6 +171,29 @@ export function VoiceGame() {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [currentClipIndex, replaysUsed]);
 
+  // Check if audio format is supported by browser
+  const checkAudioSupport = (audioUrl: string): boolean => {
+    const audio = document.createElement('audio');
+    const extension = audioUrl.split('.').pop()?.toLowerCase();
+    
+    switch (extension) {
+      case 'mp3':
+        return audio.canPlayType('audio/mpeg') !== '';
+      case 'wav':
+        return audio.canPlayType('audio/wav') !== '';
+      case 'm4a':
+        return audio.canPlayType('audio/mp4') !== '';
+      case 'ogg':
+        return audio.canPlayType('audio/ogg') !== '';
+      case 'webm':
+        return audio.canPlayType('audio/webm') !== '';
+      case 'aac':
+        return audio.canPlayType('audio/aac') !== '';
+      default:
+        return false;
+    }
+  };
+
   const playClip = async () => {
     if (!currentClip?.audio_url) {
       toast({
@@ -188,6 +209,17 @@ export function VoiceGame() {
       toast({
         title: "Click Required",
         description: "Please click anywhere on the page first to enable audio",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check if audio format is supported by browser
+    if (!checkAudioSupport(currentClip.audio_url)) {
+      const extension = currentClip.audio_url.split('.').pop()?.toLowerCase();
+      toast({
+        title: "Format Not Supported",
+        description: `Your browser doesn't support .${extension} files. Try converting to MP3 or WAV format.`,
         variant: "destructive",
       });
       return;
