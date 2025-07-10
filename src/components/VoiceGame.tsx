@@ -88,6 +88,8 @@ export function VoiceGame() {
             .from('voice-clips')
             .getPublicUrl(fullPath);
           
+          console.log('AI file loaded:', fileName, 'URL:', publicUrl);
+          
           allClips.push({
             id: `ai-clip-${index}`,
             title: fileName,
@@ -116,6 +118,8 @@ export function VoiceGame() {
             .from('voice-clips')
             .getPublicUrl(fullPath);
           
+          console.log('Human file loaded:', fileName, 'URL:', publicUrl);
+          
           allClips.push({
             id: `human-clip-${index}`,
             title: fileName,
@@ -125,6 +129,8 @@ export function VoiceGame() {
           });
         });
       }
+      
+      console.log('Total clips loaded:', allClips.length);
       
       if (allClips.length > 0) {
         // Shuffle the clips for random order
@@ -171,29 +177,6 @@ export function VoiceGame() {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [currentClipIndex, replaysUsed]);
 
-  // Check if audio format is supported by browser
-  const checkAudioSupport = (audioUrl: string): boolean => {
-    const audio = document.createElement('audio');
-    const extension = audioUrl.split('.').pop()?.toLowerCase();
-    
-    switch (extension) {
-      case 'mp3':
-        return audio.canPlayType('audio/mpeg') !== '';
-      case 'wav':
-        return audio.canPlayType('audio/wav') !== '';
-      case 'm4a':
-        return audio.canPlayType('audio/mp4') !== '';
-      case 'ogg':
-        return audio.canPlayType('audio/ogg') !== '';
-      case 'webm':
-        return audio.canPlayType('audio/webm') !== '';
-      case 'aac':
-        return audio.canPlayType('audio/aac') !== '';
-      default:
-        return false;
-    }
-  };
-
   const playClip = async () => {
     if (!currentClip?.audio_url) {
       toast({
@@ -203,6 +186,8 @@ export function VoiceGame() {
       });
       return;
     }
+
+    console.log('Attempting to play audio:', currentClip.audio_url);
 
     // Check if user has interacted with page (required for audio autoplay)
     if (!userHasInteracted) {
@@ -214,12 +199,24 @@ export function VoiceGame() {
       return;
     }
 
-    // Check if audio format is supported by browser
-    if (!checkAudioSupport(currentClip.audio_url)) {
-      const extension = currentClip.audio_url.split('.').pop()?.toLowerCase();
+    // First, let's test if the file is accessible
+    try {
+      const response = await fetch(currentClip.audio_url, { method: 'HEAD' });
+      console.log('File accessibility check:', response.status, response.headers.get('content-type'));
+      
+      if (!response.ok) {
+        toast({
+          title: "File Access Error",
+          description: `Cannot access audio file (${response.status}). Check if the file exists in storage.`,
+          variant: "destructive",
+        });
+        return;
+      }
+    } catch (error) {
+      console.error('File accessibility error:', error);
       toast({
-        title: "Format Not Supported",
-        description: `Your browser doesn't support .${extension} files. Try converting to MP3 or WAV format.`,
+        title: "Network Error",
+        description: "Cannot reach the audio file. Check your internet connection.",
         variant: "destructive",
       });
       return;
