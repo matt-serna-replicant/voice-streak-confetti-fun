@@ -131,7 +131,7 @@ All colors MUST be HSL.
 @layer components {
   /* Game-specific component styles */
   .game-button {
-    @apply transition-all duration-[350ms] ease-out;
+    @apply transition-all duration-300 ease-out;
   }
   
   .game-button:hover {
