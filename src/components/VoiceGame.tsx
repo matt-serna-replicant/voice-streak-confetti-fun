@@ -449,7 +449,7 @@ export function VoiceGame() {
                 onClick={() => handleGuess(false)}
                 size="lg"
                 variant="outline"
-                className={`game-button w-40 h-20 text-lg font-semibold border-2 hover:border-success hover:bg-success/10 flex flex-col items-center justify-center p-3 ${
+                className={`game-button w-40 h-20 text-lg font-semibold border-2 hover:bg-accent hover:text-accent-foreground flex flex-col items-center justify-center p-3 ${
                   shakeButton === 'human' ? 'shake-animation border-destructive' : ''
                 }`}
                 disabled={isPlaying}
@@ -463,7 +463,7 @@ export function VoiceGame() {
                 onClick={() => handleGuess(true)}
                 size="lg"
                 variant="outline"
-                className={`game-button w-40 h-20 text-lg font-semibold border-2 hover:border-primary hover:bg-primary/10 flex flex-col items-center justify-center p-3 ${
+                className={`game-button w-40 h-20 text-lg font-semibold border-2 hover:bg-accent hover:text-accent-foreground flex flex-col items-center justify-center p-3 ${
                   shakeButton === 'ai' ? 'shake-animation border-destructive' : ''
                 }`}
                 disabled={isPlaying}
