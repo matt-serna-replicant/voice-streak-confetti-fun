@@ -426,57 +426,67 @@ export function VoiceGame() {
         </div>
 
         {/* Game Area */}
-        <Card className="p-8 shadow-card mb-6">
-          <div className="text-center">
-            <div className="mb-6">
-              <h2 className="text-xl font-semibold mb-2">Question {currentClipIndex + 1} of {totalClips}</h2>
-              <p className="text-muted-foreground">{currentClip?.description || 'Loading...'}</p>
-            </div>
+        <Card className="p-6 shadow-card mb-6">
+          {/* Question Counter Badge */}
+          <div className="flex justify-end mb-4">
+            <Badge variant="outline" className="text-sm px-3 py-1">
+              Question {currentClipIndex + 1} of {totalClips}
+            </Badge>
+          </div>
 
-            {/* Audio Player */}
-            <div className="mb-8">
+          {/* Main Game Grid */}
+          <div className="grid grid-cols-2 gap-8 items-center">
+            {/* Left Side - Play Button */}
+            <div className="flex flex-col items-center justify-center">
               <Button
                 onClick={playClip}
                 disabled={isPlaying || loading || !currentClip}
                 size="lg"
-                className="w-32 h-32 rounded-full bg-gradient-primary hover:scale-105 transition-transform shadow-game"
+                className="w-20 h-20 rounded-full bg-gradient-primary hover:scale-105 transition-transform shadow-game"
               >
                 {isPlaying ? (
-                  <Volume2 className="h-8 w-8 animate-pulse" />
+                  <Volume2 className="h-6 w-6 animate-pulse" />
                 ) : (
-                  <Play className="h-8 w-8" />
+                  <Play className="h-6 w-6" />
                 )}
               </Button>
+              <p className="text-xs text-muted-foreground mt-2 text-center">
+                Click to play
+              </p>
             </div>
 
-            {/* Guess Buttons */}
-            <div className="flex gap-4 justify-center">
+            {/* Right Side - Choice Buttons */}
+            <div className="flex flex-col gap-3">
               <Button
                 onClick={() => handleGuess(false)}
                 size="lg"
                 variant="outline"
-                className={`game-button w-40 h-20 text-lg font-semibold border-2 hover:bg-accent hover:text-accent-foreground flex flex-col items-center justify-center p-3 ${
+                className={`w-full h-16 text-base font-semibold border-2 hover:bg-accent hover:text-accent-foreground flex items-center justify-center gap-2 ${
                   shakeButton === 'human' ? 'shake-animation border-destructive' : ''
                 }`}
                 disabled={isPlaying}
               >
-                <User className="h-4 w-4" />
-                <span className="leading-tight">Human</span>
-                <span className="text-xs text-muted-foreground leading-tight">(Press H)</span>
+                <User className="h-5 w-5" />
+                <div className="flex flex-col items-start">
+                  <span>Human</span>
+                  <span className="text-xs text-muted-foreground font-normal">Press H</span>
+                </div>
               </Button>
 
               <Button
                 onClick={() => handleGuess(true)}
                 size="lg"
                 variant="outline"
-                className={`game-button w-40 h-20 text-lg font-semibold border-2 hover:bg-accent hover:text-accent-foreground flex flex-col items-center justify-center p-3 ${
+                className={`w-full h-16 text-base font-semibold border-2 hover:bg-accent hover:text-accent-foreground flex items-center justify-center gap-2 ${
                   shakeButton === 'ai' ? 'shake-animation border-destructive' : ''
                 }`}
                 disabled={isPlaying}
               >
-                <Bot className="h-4 w-4" />
-                <span className="leading-tight">AI</span>
-                <span className="text-xs text-muted-foreground leading-tight">(Press A)</span>
+                <Bot className="h-5 w-5" />
+                <div className="flex flex-col items-start">
+                  <span>AI</span>
+                  <span className="text-xs text-muted-foreground font-normal">Press A</span>
+                </div>
               </Button>
             </div>
           </div>
