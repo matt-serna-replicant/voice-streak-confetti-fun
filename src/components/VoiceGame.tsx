@@ -374,7 +374,9 @@ export function VoiceGame() {
       setTimeout(() => {
         setCurrentClipIndex(prev => prev + 1);
         setReplaysUsed(0);
-      }, 1500);
+        // Auto-play the next clip after a short delay to ensure state has updated
+        setTimeout(() => playClip(), 100);
+      }, 1000);
     }
   };
 
