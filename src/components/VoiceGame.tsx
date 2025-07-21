@@ -450,28 +450,28 @@ export function VoiceGame() {
                 onClick={() => handleGuess(false)}
                 size="lg"
                 variant="outline"
-                className={`game-button w-32 h-16 text-lg font-semibold border-2 hover:border-success hover:bg-success/10 flex flex-col items-center justify-center ${
+                className={`game-button w-40 h-20 text-lg font-semibold border-2 hover:border-success hover:bg-success/10 flex flex-col items-center justify-center p-3 ${
                   shakeButton === 'human' ? 'shake-animation border-destructive' : ''
                 }`}
                 disabled={isPlaying}
               >
                 <User className="h-5 w-5 mb-1" />
                 <span>Human</span>
-                <span className="text-xs text-muted-foreground">(Press H)</span>
+                <span className="text-xs text-muted-foreground mt-1">(Press H)</span>
               </Button>
 
               <Button
                 onClick={() => handleGuess(true)}
                 size="lg"
                 variant="outline"
-                className={`game-button w-32 h-16 text-lg font-semibold border-2 hover:border-primary hover:bg-primary/10 flex flex-col items-center justify-center ${
+                className={`game-button w-40 h-20 text-lg font-semibold border-2 hover:border-primary hover:bg-primary/10 flex flex-col items-center justify-center p-3 ${
                   shakeButton === 'ai' ? 'shake-animation border-destructive' : ''
                 }`}
                 disabled={isPlaying}
               >
                 <Bot className="h-5 w-5 mb-1" />
                 <span>AI</span>
-                <span className="text-xs text-muted-foreground">(Press A)</span>
+                <span className="text-xs text-muted-foreground mt-1">(Press A)</span>
               </Button>
             </div>
           </div>
