@@ -232,8 +232,18 @@ export function VoiceGame() {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [currentClipIndex, replaysUsed]);
 
-  const playClip = async () => {
-    if (!currentClip?.audio_url) {
+  const playClipAtIndex = async (index: number) => {
+    const clipToPlay = voiceClips[index];
+    console.log('=== PLAY CLIP AT INDEX DEBUG ===');
+    console.log('Requested index:', index);
+    console.log('voiceClips length:', voiceClips.length);
+    console.log('clipToPlay:', clipToPlay);
+    console.log('clipToPlay title:', clipToPlay?.title);
+    console.log('clipToPlay is_ai:', clipToPlay?.is_ai);
+    console.log('clipToPlay audio_url:', clipToPlay?.audio_url);
+    console.log('================================');
+    
+    if (!clipToPlay?.audio_url) {
       toast({
         title: "No Audio",
         description: `No audio file available for this clip.`,
@@ -277,7 +287,7 @@ export function VoiceGame() {
         audio.addEventListener('canplay', onCanPlay, { once: true });
         audio.addEventListener('error', onError, { once: true });
         
-        audio.src = currentClip.audio_url;
+        audio.src = clipToPlay.audio_url;
       });
       
       const onEnded = () => {
@@ -317,8 +327,27 @@ export function VoiceGame() {
     }
   };
 
+  const playClip = async () => {
+    console.log('=== PLAY CLIP DEBUG ===');
+    console.log('currentClipIndex:', currentClipIndex);
+    console.log('voiceClips length:', voiceClips.length);
+    console.log('currentClip:', currentClip);
+    console.log('currentClip title:', currentClip?.title);
+    console.log('currentClip is_ai:', currentClip?.is_ai);
+    console.log('currentClip audio_url:', currentClip?.audio_url);
+    console.log('======================');
+    
+    return playClipAtIndex(currentClipIndex);
+  };
+
   const handleGuess = (guessedAI: boolean) => {
     if (!currentClip) return;
+    
+    console.log('=== HANDLE GUESS DEBUG ===');
+    console.log('Current clip before guess:', currentClip.title);
+    console.log('Current index before guess:', currentClipIndex);
+    console.log('===========================');
+    
     const isCorrect = guessedAI === currentClip.is_ai;
     
     if (isCorrect) {
@@ -351,9 +380,21 @@ export function VoiceGame() {
       setTimeout(() => setShowResults(true), 1500);
     } else {
       setTimeout(() => {
-        setCurrentClipIndex(prev => prev + 1);
+        console.log('=== MOVING TO NEXT CLIP ===');
+        console.log('Current index before increment:', currentClipIndex);
+        const nextIndex = currentClipIndex + 1;
+        
+        setCurrentClipIndex(nextIndex);
         setReplaysUsed(0);
-        setTimeout(() => playClip(), 100);
+        
+        // Auto-play the next clip using the calculated index to avoid state timing issues
+        setTimeout(() => {
+          console.log('About to auto-play next clip...');
+          console.log('Current voiceClips array:', voiceClips.length);
+          console.log('Playing clip at index:', nextIndex);
+          // Use the calculated index directly instead of relying on state
+          playClipAtIndex(nextIndex);
+        }, 100);
       }, 1000);
     }
   };
