@@ -139,11 +139,36 @@ export function VoiceGame() {
       console.log('Total clips loaded:', allClips.length);
       
       if (allClips.length > 0) {
-        // Shuffle all clips and take only 10 for the game
+        // Ensure we have enough clips for a full game
+        const minClipsNeeded = 10;
+        
+        if (allClips.length < minClipsNeeded) {
+          toast({
+            title: "Not enough audio files",
+            description: `Need at least ${minClipsNeeded} clips but only found ${allClips.length}. Upload more audio files!`,
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        // Shuffle all clips and take exactly 10 unique clips for the game
         const shuffledClips = allClips.sort(() => Math.random() - 0.5);
         const gameClips = shuffledClips.slice(0, 10);
-        setVoiceClips(gameClips);
-        console.log(`Game set with ${gameClips.length} clips out of ${allClips.length} total clips`);
+        
+        // Verify all clips are unique (additional safety check)
+        const uniqueIds = new Set(gameClips.map(clip => clip.id));
+        if (uniqueIds.size !== gameClips.length) {
+          console.error('Duplicate clips detected, reshuffling...');
+          // Reshuffle if duplicates somehow exist
+          const reshuffled = allClips.sort(() => Math.random() - 0.5);
+          const uniqueGameClips = reshuffled.slice(0, 10);
+          setVoiceClips(uniqueGameClips);
+          console.log(`Game set with ${uniqueGameClips.length} unique clips out of ${allClips.length} total clips`);
+        } else {
+          setVoiceClips(gameClips);
+          console.log(`Game set with ${gameClips.length} unique clips out of ${allClips.length} total clips`);
+        }
+        
         console.log('First clip:', gameClips[0]);
       } else {
         toast({
