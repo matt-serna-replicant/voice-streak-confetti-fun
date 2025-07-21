@@ -447,18 +447,6 @@ export function VoiceGame() {
                   <Play className="h-8 w-8" />
                 )}
               </Button>
-              
-              <div className="mt-4 flex items-center justify-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={playClip}
-                  disabled={replaysUsed >= maxReplays || isPlaying}
-                >
-                  <RotateCcw className="h-4 w-4 mr-1" />
-                  Replay ({maxReplays - replaysUsed} left)
-                </Button>
-              </div>
             </div>
 
             {/* Guess Buttons */}
