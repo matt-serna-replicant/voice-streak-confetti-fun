@@ -139,9 +139,56 @@ export function VoiceGame() {
           return;
         }
         
-        // Shuffle and select 10 unique clips
-        const shuffledClips = allClips.sort(() => Math.random() - 0.5);
-        const gameClips = shuffledClips.slice(0, 10);
+        // Separate AI and Human voices
+        const aiClips = allClips.filter(clip => clip.is_ai);
+        const humanClips = allClips.filter(clip => !clip.is_ai);
+        
+        console.log(`Found ${aiClips.length} AI clips and ${humanClips.length} human clips`);
+        
+        // Ensure we have enough of each type
+        if (aiClips.length < 3 || humanClips.length < 3) {
+          toast({
+            title: "Insufficient voice variety",
+            description: `Need at least 3 AI voices and 3 human voices. Found ${aiClips.length} AI and ${humanClips.length} human.`,
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        // Create a balanced selection: no more than 7 of either type
+        const maxOfEachType = 7;
+        const minOfEachType = 3;
+        
+        // Shuffle both arrays
+        const shuffledAI = aiClips.sort(() => Math.random() - 0.5);
+        const shuffledHuman = humanClips.sort(() => Math.random() - 0.5);
+        
+        // Determine how many of each type to use
+        let aiCount, humanCount;
+        
+        if (aiClips.length >= maxOfEachType && humanClips.length >= maxOfEachType) {
+          // Both have enough - randomly decide the split
+          aiCount = Math.floor(Math.random() * (maxOfEachType - minOfEachType + 1)) + minOfEachType;
+          humanCount = 10 - aiCount;
+        } else if (aiClips.length < maxOfEachType) {
+          // Limited AI clips
+          aiCount = Math.min(aiClips.length, maxOfEachType);
+          humanCount = 10 - aiCount;
+        } else {
+          // Limited human clips
+          humanCount = Math.min(humanClips.length, maxOfEachType);
+          aiCount = 10 - humanCount;
+        }
+        
+        // Select the clips
+        const selectedAI = shuffledAI.slice(0, aiCount);
+        const selectedHuman = shuffledHuman.slice(0, humanCount);
+        
+        // Combine and shuffle the final selection
+        const gameClips = [...selectedAI, ...selectedHuman].sort(() => Math.random() - 0.5);
+        
+        console.log(`Selected ${selectedAI.length} AI clips and ${selectedHuman.length} human clips for game`);
+        console.log('Game clips:', gameClips.map(clip => `${clip.title} (${clip.is_ai ? 'AI' : 'Human'})`));
         
         setVoiceClips(gameClips);
       } else {
