@@ -466,11 +466,11 @@ export function VoiceGame() {
             {/* Game card with glass effect */}
             <div className="game-card p-8 slide-up-enter">
               {/* Large circular play button - centered */}
-              <div className="flex justify-center mb-8">
+              <div className="flex flex-col items-center mb-8">
                 <button
                   onClick={playClip}
                   disabled={isPlaying || loading || !currentClip}
-                  className="play-button flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="play-button flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed mb-3"
                   aria-label="Play voice clip"
                 >
                   {isPlaying ? (
@@ -479,6 +479,9 @@ export function VoiceGame() {
                     <Play className="h-6 w-6 ml-1" />
                   )}
                 </button>
+                <p className="text-2xs text-muted-foreground text-center">
+                  Click to replay voice
+                </p>
               </div>
 
               {/* Answer buttons - stacked vertically with full width */}
