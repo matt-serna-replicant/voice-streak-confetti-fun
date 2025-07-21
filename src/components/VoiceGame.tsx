@@ -417,11 +417,6 @@ export function VoiceGame() {
                 {currentStreak}
               </Badge>
             )}
-            
-            <div className="text-center">
-              <div className="text-2xl font-bold text-accent">{longestStreak}</div>
-              <div className="text-sm text-muted-foreground">Best Streak</div>
-            </div>
           </div>
         </div>
 
