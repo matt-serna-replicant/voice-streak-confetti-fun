@@ -139,10 +139,12 @@ export function VoiceGame() {
       console.log('Total clips loaded:', allClips.length);
       
       if (allClips.length > 0) {
-        // Shuffle the clips for random order
+        // Shuffle all clips and take only 10 for the game
         const shuffledClips = allClips.sort(() => Math.random() - 0.5);
-        setVoiceClips(shuffledClips);
-        console.log('Clips set, first clip:', shuffledClips[0]);
+        const gameClips = shuffledClips.slice(0, 10);
+        setVoiceClips(gameClips);
+        console.log(`Game set with ${gameClips.length} clips out of ${allClips.length} total clips`);
+        console.log('First clip:', gameClips[0]);
       } else {
         toast({
           title: "No audio files found",
@@ -164,7 +166,7 @@ export function VoiceGame() {
 
   const currentClip = voiceClips[currentClipIndex];
   const maxReplays = 3;
-  const totalClips = voiceClips.length || 10;
+  const totalClips = 10; // Fixed to 10 questions per game
 
   // Keyboard shortcuts
   useEffect(() => {
