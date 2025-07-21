@@ -494,25 +494,6 @@ export function VoiceGame() {
           </div>
         </Card>
 
-        {/* Game History */}
-        {gameHistory.length > 0 && (
-          <div className="text-center">
-            <div className="flex justify-center gap-1 flex-wrap">
-              {gameHistory.map((correct, index) => (
-                <div
-                  key={index}
-                  className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                    correct 
-                      ? 'bg-success text-success-foreground' 
-                      : 'bg-destructive text-destructive-foreground'
-                  }`}
-                >
-                  {correct ? '✓' : '✗'}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Confetti Effect */}
