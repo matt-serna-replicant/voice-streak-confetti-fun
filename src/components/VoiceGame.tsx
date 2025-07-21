@@ -349,10 +349,6 @@ export function VoiceGame() {
       setShowConfetti(true);
       playSound('success');
       
-      toast({
-        title: "Correct! 🎉",
-        description: `${currentClip.is_ai ? 'AI' : 'Human'} voice detected`,
-      });
 
       setTimeout(() => setShowConfetti(false), 1000);
     } else {
