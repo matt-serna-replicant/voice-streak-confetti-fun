@@ -371,9 +371,8 @@ export function VoiceGame() {
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <Volume2 className="h-8 w-8 text-primary" />
-            <h1 className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+          <div className="mb-4">
+            <h1 className="text-4xl font-bold font-inter bg-gradient-primary bg-clip-text text-transparent">
               Guess the Voice
             </h1>
           </div>
