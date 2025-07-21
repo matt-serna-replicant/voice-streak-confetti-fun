@@ -6,7 +6,7 @@
 All colors MUST be HSL.
 */
 
-@import url('https://fonts.googleapis.com/css2?family=Jost:wght@400;500;600;700&display=swap');
+/* Modern Inter font is now loaded via index.html */
 
 @layer base {
   :root {
@@ -124,7 +124,7 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground font-jost;
+    @apply bg-background text-foreground font-inter;
   }
 }
 

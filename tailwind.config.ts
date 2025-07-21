@@ -19,7 +19,8 @@ export default {
 		},
 		extend: {
 			fontFamily: {
-				jost: ['Jost', 'system-ui', 'sans-serif'],
+				sans: ['Inter', 'system-ui', 'sans-serif'],
+				inter: ['Inter', 'system-ui', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
