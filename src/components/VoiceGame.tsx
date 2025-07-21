@@ -379,10 +379,9 @@ export function VoiceGame() {
             </h1>
           </div>
           
-          {/* Progress Bar */}
+          {/* Question Counter */}
           <div className="mb-4">
-            <Progress value={progress} className="h-2" />
-            <p className="text-sm text-muted-foreground mt-2">
+            <p className="text-sm text-muted-foreground">
               Question {currentClipIndex + 1} of {totalClips}
             </p>
           </div>
