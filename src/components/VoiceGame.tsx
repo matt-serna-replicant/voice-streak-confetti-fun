@@ -455,9 +455,9 @@ export function VoiceGame() {
                 }`}
                 disabled={isPlaying}
               >
-                <User className="h-5 w-5 mb-1" />
-                <span>Human</span>
-                <span className="text-xs text-muted-foreground mt-1">(Press H)</span>
+                <User className="h-4 w-4" />
+                <span className="leading-tight">Human</span>
+                <span className="text-xs text-muted-foreground leading-tight">(Press H)</span>
               </Button>
 
               <Button
@@ -469,9 +469,9 @@ export function VoiceGame() {
                 }`}
                 disabled={isPlaying}
               >
-                <Bot className="h-5 w-5 mb-1" />
-                <span>AI</span>
-                <span className="text-xs text-muted-foreground mt-1">(Press A)</span>
+                <Bot className="h-4 w-4" />
+                <span className="leading-tight">AI</span>
+                <span className="text-xs text-muted-foreground leading-tight">(Press A)</span>
               </Button>
             </div>
           </div>
