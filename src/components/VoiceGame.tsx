@@ -405,18 +405,25 @@ export function VoiceGame() {
           </div>
 
           {/* Score & Streak */}
-          <div className="flex items-center justify-center gap-6 mb-6">
+          <div className="grid grid-cols-3 items-center mb-6 max-w-md mx-auto">
+            {/* Left spacer */}
+            <div></div>
+            
+            {/* Center - Score (fixed position) */}
             <div className="text-center">
               <div className="text-2xl font-bold text-primary">{score}</div>
               <div className="text-sm text-muted-foreground">Score</div>
             </div>
             
-            {currentStreak > 0 && (
-              <Badge className="streak-badge text-lg px-3 py-1">
-                <Flame className="h-4 w-4 mr-1" />
-                {currentStreak}
-              </Badge>
-            )}
+            {/* Right - Streak Badge */}
+            <div className="flex justify-start">
+              {currentStreak > 0 && (
+                <Badge className="streak-badge text-lg px-3 py-1">
+                  <Flame className="h-4 w-4 mr-1" />
+                  {currentStreak}
+                </Badge>
+              )}
+            </div>
           </div>
         </div>
 
