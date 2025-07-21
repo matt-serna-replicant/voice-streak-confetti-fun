@@ -403,13 +403,6 @@ export function VoiceGame() {
               Guess the Voice
             </h1>
           </div>
-          
-          {/* Question Counter */}
-          <div className="mb-4">
-            <p className="text-sm text-muted-foreground">
-              Question {currentClipIndex + 1} of {totalClips}
-            </p>
-          </div>
 
           {/* Score & Streak */}
           <div className="flex items-center justify-center gap-6 mb-6">
@@ -436,7 +429,7 @@ export function VoiceGame() {
         <Card className="p-8 shadow-card mb-6">
           <div className="text-center">
             <div className="mb-6">
-              <h2 className="text-xl font-semibold mb-2">Listen to this voice:</h2>
+              <h2 className="text-xl font-semibold mb-2">Question {currentClipIndex + 1} of {totalClips}</h2>
               <p className="text-muted-foreground">{currentClip?.description || 'Loading...'}</p>
             </div>
 
