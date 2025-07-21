@@ -151,9 +151,8 @@ All colors MUST be HSL for consistency.
   }
   
   .play-button {
-    @apply w-24 h-24 rounded-full bg-gradient-primary text-white font-medium;
-    @apply transition-all duration-[var(--duration-normal)] ease-[var(--ease-smooth)];
-    @apply shadow-card hover:shadow-lg focus:shadow-focus;
+    @apply w-24 h-24 rounded-full bg-gradient-primary text-white font-medium shadow-card hover:shadow-lg;
+    transition: all var(--duration-normal) var(--ease-smooth);
     box-shadow: var(--shadow-card), 0 0 0 0 hsl(var(--ring) / 0);
   }
   
@@ -166,15 +165,26 @@ All colors MUST be HSL for consistency.
     box-shadow: var(--shadow-pressed);
   }
   
+  .play-button:focus {
+    box-shadow: var(--shadow-focus);
+  }
+  
   .answer-button {
     @apply h-16 rounded-xl bg-white/50 border border-card-border text-foreground;
-    @apply transition-all duration-[var(--duration-normal)] ease-[var(--ease-smooth)];
-    @apply hover:bg-white/70 hover:shadow-ambient focus:shadow-focus;
+    transition: all var(--duration-normal) var(--ease-smooth);
+  }
+  
+  .answer-button:hover {
+    @apply bg-white/70 shadow-ambient;
   }
   
   .answer-button:active {
     transform: scale(0.98);
     box-shadow: var(--shadow-pressed);
+  }
+  
+  .answer-button:focus {
+    box-shadow: var(--shadow-focus);
   }
   
   .answer-button-correct {
@@ -188,7 +198,8 @@ All colors MUST be HSL for consistency.
   }
   
   .progress-segment {
-    @apply h-1 rounded-full bg-muted transition-colors duration-300;
+    @apply h-1 rounded-full bg-muted;
+    transition: background-color 300ms ease-out;
   }
   
   .progress-segment-filled {
@@ -196,7 +207,7 @@ All colors MUST be HSL for consistency.
   }
   
   .slide-up-enter {
-    animation: slide-up-fade-in 350ms ease-[var(--ease-smooth)];
+    animation: slide-up-fade-in var(--duration-slow) var(--ease-smooth);
   }
   
   @keyframes slide-up-fade-in {
@@ -227,7 +238,7 @@ All colors MUST be HSL for consistency.
   }
   
   .score-update {
-    animation: spring-scale 300ms ease-[var(--ease-spring)];
+    animation: spring-scale var(--duration-slow) var(--ease-spring);
   }
   
   /* Responsive adjustments */
