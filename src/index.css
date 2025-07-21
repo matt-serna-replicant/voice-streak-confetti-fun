@@ -2,65 +2,76 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Guess the Voice - Design System 
-All colors MUST be HSL.
+/* Apple-Inspired Design System - Guess the Voice
+All colors MUST be HSL for consistency.
 */
-
-/* Modern Inter font is now loaded via index.html */
 
 @layer base {
   :root {
-    /* Game Brand Colors */
-    --brand-primary: 233 82% 60%; /* #2e56ff */
-    --brand-secondary: 189 95% 52%; /* #08eeff */
-    --brand-success: 142 76% 36%; /* #22c55e */
-    --brand-error: 0 84% 60%; /* #ef4444 */
+    /* Apple-inspired brand colors - indigo to cyan gradient */
+    --brand-primary: 238 70% 55%; /* Bright indigo */
+    --brand-secondary: 195 100% 50%; /* Bright cyan */
+    --brand-success: 142 76% 48%; /* Emerald green */
+    --brand-error: 0 84% 60%; /* Rose red */
     
-    /* Core System Colors */
-    --background: 0 0% 96%; /* #f5f5f5 */
-    --foreground: 222 84% 5%;
+    /* Core layout colors - light theme */
+    --background: 0 0% 97%; /* Very light grey page background */
+    --foreground: 224 15% 25%; /* Dark grey for primary text */
+    --muted-foreground: 224 10% 45%; /* Medium grey for secondary text */
     
-    --card: 0 0% 100%;
-    --card-foreground: 222 84% 5%;
+    /* Card system with glass effect */
+    --card: 0 0% 100% / 0.7; /* White at 70% opacity */
+    --card-foreground: 224 15% 25%;
+    --card-border: 0 0% 88%;
     
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 84% 5%;
-    
-    --primary: 233 82% 60%; /* Brand primary */
+    /* Interactive elements */
+    --primary: 238 70% 55%; /* Indigo */
     --primary-foreground: 0 0% 100%;
     
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary: 210 25% 94%;
+    --secondary-foreground: 224 15% 25%;
     
-    --muted: 210 40% 95%;
-    --muted-foreground: 215 16% 47%;
-    
-    --accent: 189 95% 52%; /* Brand secondary */
+    --accent: 195 100% 50%; /* Cyan */
     --accent-foreground: 0 0% 100%;
     
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
     
-    --success: 142 76% 36%;
+    --success: 142 76% 48%;
     --success-foreground: 0 0% 100%;
     
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 233 82% 60%;
+    --border: 0 0% 88%;
+    --input: 0 0% 88%;
+    --ring: 238 70% 55%;
     
-    --radius: 0.75rem; /* 12px rounded corners */
+    /* Design tokens for Apple-style interface */
+    --radius-lg: 1rem; /* 16px - large radius for cards */
+    --radius-full: 9999px; /* Full radius for play button */
     
-    /* Game-specific design tokens */
-    --gradient-primary: linear-gradient(135deg, hsl(233 82% 60%), hsl(189 95% 52%));
-    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(0 0% 98%));
-    --shadow-game: 0 10px 30px -10px hsl(233 82% 60% / 0.2);
-    --shadow-card: 0 4px 20px -4px hsl(0 0% 0% / 0.1);
-    --transition-game: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Gradients - only for interactive elements */
+    --gradient-primary: linear-gradient(135deg, hsl(238 70% 55%), hsl(195 100% 50%));
+    --gradient-glass: linear-gradient(135deg, hsl(0 0% 100% / 0.8), hsl(0 0% 98% / 0.6));
     
-    /* Animation values */
-    --duration-quick: 200ms;
-    --duration-smooth: 350ms;
-    --ease-game: cubic-bezier(0.4, 0, 0.2, 1);
+    /* Apple-style shadows */
+    --shadow-ambient: 0 1px 3px 0 hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+    --shadow-card: 0 4px 15px -2px hsl(0 0% 0% / 0.08), 0 2px 8px -2px hsl(0 0% 0% / 0.04);
+    --shadow-pressed: 0 1px 2px 0 hsl(0 0% 0% / 0.06);
+    --shadow-focus: 0 0 0 2px hsl(238 70% 55% / 0.2);
+    
+    /* Motion design */
+    --duration-fast: 150ms;
+    --duration-normal: 200ms;
+    --duration-slow: 350ms;
+    --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    
+    /* Typography scale */
+    --text-2xs: 0.75rem; /* 12px */
+    --text-xs: 0.875rem; /* 14px */
+    --text-sm: 1rem; /* 16px */
+    --text-base: 1.125rem; /* 18px */
+    --text-lg: 1.5rem; /* 24px */
+    --text-xl: 2rem; /* 32px */
 
     --sidebar-background: 0 0% 98%;
 
@@ -80,33 +91,38 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* Dark mode - near-black background */
+    --background: 224 15% 6%; /* Near-black page background */
+    --foreground: 0 0% 95%; /* Light grey for primary text */
+    --muted-foreground: 224 10% 65%; /* Medium grey for secondary text */
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    /* Dark card with charcoal background */
+    --card: 224 15% 12% / 0.9; /* Dark charcoal at 90% opacity */
+    --card-foreground: 0 0% 95%;
+    --card-border: 224 15% 20%;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    /* Interactive elements - keep gradient unchanged for consistency */
+    --primary: 238 70% 55%; /* Keep indigo unchanged */
+    --primary-foreground: 0 0% 100%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 224 15% 18%;
+    --secondary-foreground: 0 0% 95%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --accent: 195 100% 50%; /* Keep cyan unchanged */
+    --accent-foreground: 0 0% 100%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --success: 142 76% 48%;
+    --success-foreground: 0 0% 100%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --border: 224 15% 20%;
+    --input: 224 15% 20%;
+    --ring: 238 70% 55%;
+    
+    /* Update gradients for dark mode */
+    --gradient-glass: linear-gradient(135deg, hsl(224 15% 15% / 0.8), hsl(224 15% 12% / 0.6));
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -129,53 +145,99 @@ All colors MUST be HSL.
 }
 
 @layer components {
-  /* Game-specific component styles */
-  .game-button {
-    @apply transition-all duration-300 ease-out;
+  /* Apple-inspired game components */
+  .game-card {
+    @apply rounded-2xl backdrop-blur-md bg-card/70 border border-card-border shadow-card;
   }
   
-  .game-button:hover {
-    @apply scale-105;
+  .play-button {
+    @apply w-24 h-24 rounded-full bg-gradient-primary text-white font-medium;
+    @apply transition-all duration-[var(--duration-normal)] ease-[var(--ease-smooth)];
+    @apply shadow-card hover:shadow-lg focus:shadow-focus;
+    box-shadow: var(--shadow-card), 0 0 0 0 hsl(var(--ring) / 0);
   }
   
-  .game-button:active {
-    @apply scale-95;
+  .play-button:hover {
+    transform: scale(1.02);
   }
   
-  .streak-badge {
-    @apply bg-gradient-to-r from-orange-400 to-red-500 text-white;
+  .play-button:active {
+    transform: scale(0.98);
+    box-shadow: var(--shadow-pressed);
   }
   
-  .confetti-burst {
-    @apply animate-bounce;
+  .answer-button {
+    @apply h-16 rounded-xl bg-white/50 border border-card-border text-foreground;
+    @apply transition-all duration-[var(--duration-normal)] ease-[var(--ease-smooth)];
+    @apply hover:bg-white/70 hover:shadow-ambient focus:shadow-focus;
   }
   
-  .shake-animation {
-    animation: shake 0.3s ease-in-out;
+  .answer-button:active {
+    transform: scale(0.98);
+    box-shadow: var(--shadow-pressed);
   }
   
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-4px); }
-    75% { transform: translateX(4px); }
+  .answer-button-correct {
+    @apply bg-success/10 border-success/30 text-success-foreground;
+    animation: flash-success 400ms ease-out;
   }
   
-  @keyframes confetti-pop {
-    0% { 
-      transform: scale(0) rotate(0deg);
+  .answer-button-incorrect {
+    @apply bg-destructive/10 border-destructive/30 text-destructive-foreground;
+    animation: flash-error 400ms ease-out;
+  }
+  
+  .progress-segment {
+    @apply h-1 rounded-full bg-muted transition-colors duration-300;
+  }
+  
+  .progress-segment-filled {
+    @apply bg-gradient-primary;
+  }
+  
+  .slide-up-enter {
+    animation: slide-up-fade-in 350ms ease-[var(--ease-smooth)];
+  }
+  
+  @keyframes slide-up-fade-in {
+    0% {
       opacity: 0;
-    }
-    50% {
-      transform: scale(1.2) rotate(180deg);
-      opacity: 1;
+      transform: translateY(16px);
     }
     100% {
-      transform: scale(1) rotate(360deg);
-      opacity: 0;
+      opacity: 1;
+      transform: translateY(0);
     }
   }
   
-  .confetti-particle {
-    animation: confetti-pop 1s ease-out forwards;
+  @keyframes flash-success {
+    0%, 100% { background-color: hsl(var(--success) / 0.1); }
+    50% { background-color: hsl(var(--success) / 0.2); }
+  }
+  
+  @keyframes flash-error {
+    0%, 100% { background-color: hsl(var(--destructive) / 0.1); }
+    50% { background-color: hsl(var(--destructive) / 0.2); }
+  }
+  
+  @keyframes spring-scale {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  
+  .score-update {
+    animation: spring-scale 300ms ease-[var(--ease-spring)];
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .play-button {
+      @apply w-28 h-28; /* 112px diameter on mobile */
+    }
+    
+    .answer-button {
+      @apply h-18; /* 72px tall on mobile */
+    }
   }
 }

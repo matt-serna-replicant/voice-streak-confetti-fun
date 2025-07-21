@@ -58,7 +58,8 @@ export default {
 				},
 				card: {
 					DEFAULT: 'hsl(var(--card))',
-					foreground: 'hsl(var(--card-foreground))'
+					foreground: 'hsl(var(--card-foreground))',
+					border: 'hsl(var(--card-border))'
 				},
 				brand: {
 					primary: 'hsl(var(--brand-primary))',
@@ -79,19 +80,41 @@ export default {
 			},
 			backgroundImage: {
 				'gradient-primary': 'var(--gradient-primary)',
-				'gradient-subtle': 'var(--gradient-subtle)'
+				'gradient-glass': 'var(--gradient-glass)'
 			},
 			boxShadow: {
-				'game': 'var(--shadow-game)',
-				'card': 'var(--shadow-card)'
+				'ambient': 'var(--shadow-ambient)',
+				'card': 'var(--shadow-card)',
+				'pressed': 'var(--shadow-pressed)',
+				'focus': 'var(--shadow-focus)'
 			},
 			transitionDuration: {
-				'game': 'var(--duration-smooth)'
+				'fast': 'var(--duration-fast)',
+				'normal': 'var(--duration-normal)',
+				'slow': 'var(--duration-slow)'
+			},
+			transitionTimingFunction: {
+				'smooth': 'var(--ease-smooth)',
+				'spring': 'var(--ease-spring)'
+			},
+			fontSize: {
+				'2xs': 'var(--text-2xs)',
+				'xs': 'var(--text-xs)',
+				'sm': 'var(--text-sm)',
+				'base': 'var(--text-base)',
+				'lg': 'var(--text-lg)',
+				'xl': 'var(--text-xl)'
+			},
+			spacing: {
+				'18': '4.5rem'
 			},
 			borderRadius: {
-				lg: 'var(--radius)',
-				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
+				'lg': '1rem',
+				'xl': '1.5rem',
+				'2xl': '2rem',
+				'full': '9999px',
+				'md': '0.75rem',
+				'sm': '0.5rem'
 			},
 			keyframes: {
 				'accordion-down': {

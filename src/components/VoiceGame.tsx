@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Volume2, Play, RotateCcw, User, Bot, Flame } from 'lucide-react';
+import { Volume2, Play, User, Bot, Flame } from 'lucide-react';
 import { Confetti } from './Confetti';
 import { ResultsModal } from './ResultsModal';
 import { useToast } from '@/hooks/use-toast';
@@ -25,12 +23,13 @@ export function VoiceGame() {
   const [longestStreak, setLongestStreak] = useState(0);
   const [gameHistory, setGameHistory] = useState<boolean[]>([]);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [shakeButton, setShakeButton] = useState<'human' | 'ai' | null>(null);
+  const [feedbackState, setFeedbackState] = useState<'correct' | 'incorrect' | null>(null);
   const [replaysUsed, setReplaysUsed] = useState(0);
   const [showResults, setShowResults] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [loading, setLoading] = useState(true);
   const [userHasInteracted, setUserHasInteracted] = useState(false);
+  const [scoreUpdated, setScoreUpdated] = useState(false);
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { toast } = useToast();
@@ -59,7 +58,7 @@ export function VoiceGame() {
 
   const loadVoiceClips = async () => {
     try {
-      // Load files from both AI and human voice folders (updated folder names)
+      // Load files from both AI and human voice folders
       const [aiVoicesResult, humanVoicesResult] = await Promise.all([
         supabase.storage.from('voice-clips').list('AI-voices'),
         supabase.storage.from('voice-clips').list('human-voices')
@@ -81,17 +80,13 @@ export function VoiceGame() {
         
         aiAudioFiles.forEach((file, index) => {
           const fullPath = `AI-voices/${file.name}`;
-          const fileName = file.name.replace(/\.[^/.]+$/, ''); // Remove file extension
+          const fileName = file.name.replace(/\.[^/.]+$/, '');
           
-          // Get public URL for the audio file with proper encoding
           const { data: { publicUrl } } = supabase.storage
             .from('voice-clips')
             .getPublicUrl(fullPath);
           
-          // Keep the properly encoded URL from Supabase
           const cleanUrl = publicUrl;
-          
-          console.log('AI file loaded:', fileName, 'URL:', cleanUrl);
           
           allClips.push({
             id: `ai-clip-${index}`,
@@ -114,17 +109,13 @@ export function VoiceGame() {
         
         humanAudioFiles.forEach((file, index) => {
           const fullPath = `human-voices/${file.name}`;
-          const fileName = file.name.replace(/\.[^/.]+$/, ''); // Remove file extension
+          const fileName = file.name.replace(/\.[^/.]+$/, '');
           
-          // Get public URL for the audio file with proper encoding
           const { data: { publicUrl } } = supabase.storage
             .from('voice-clips')
             .getPublicUrl(fullPath);
           
-          // Keep the properly encoded URL from Supabase  
           const cleanUrl = publicUrl;
-          
-          console.log('Human file loaded:', fileName, 'URL:', cleanUrl);
           
           allClips.push({
             id: `human-clip-${index}`,
@@ -136,10 +127,7 @@ export function VoiceGame() {
         });
       }
       
-      console.log('Total clips loaded:', allClips.length);
-      
       if (allClips.length > 0) {
-        // Ensure we have enough clips for a full game
         const minClipsNeeded = 10;
         
         if (allClips.length < minClipsNeeded) {
@@ -151,25 +139,11 @@ export function VoiceGame() {
           return;
         }
         
-        // Shuffle all clips and take exactly 10 unique clips for the game
+        // Shuffle and select 10 unique clips
         const shuffledClips = allClips.sort(() => Math.random() - 0.5);
         const gameClips = shuffledClips.slice(0, 10);
         
-        // Verify all clips are unique (additional safety check)
-        const uniqueIds = new Set(gameClips.map(clip => clip.id));
-        if (uniqueIds.size !== gameClips.length) {
-          console.error('Duplicate clips detected, reshuffling...');
-          // Reshuffle if duplicates somehow exist
-          const reshuffled = allClips.sort(() => Math.random() - 0.5);
-          const uniqueGameClips = reshuffled.slice(0, 10);
-          setVoiceClips(uniqueGameClips);
-          console.log(`Game set with ${uniqueGameClips.length} unique clips out of ${allClips.length} total clips`);
-        } else {
-          setVoiceClips(gameClips);
-          console.log(`Game set with ${gameClips.length} unique clips out of ${allClips.length} total clips`);
-        }
-        
-        console.log('First clip:', gameClips[0]);
+        setVoiceClips(gameClips);
       } else {
         toast({
           title: "No audio files found",
@@ -191,7 +165,7 @@ export function VoiceGame() {
 
   const currentClip = voiceClips[currentClipIndex];
   const maxReplays = 3;
-  const totalClips = 10; // Fixed to 10 questions per game
+  const totalClips = 10;
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -212,61 +186,42 @@ export function VoiceGame() {
   }, [currentClipIndex, replaysUsed]);
 
   const playClip = async () => {
-    console.log('playClip called. currentClipIndex:', currentClipIndex);
-    console.log('voiceClips length:', voiceClips.length);
-    console.log('currentClip:', currentClip);
-    console.log('currentClip?.audio_url:', currentClip?.audio_url);
-    
     if (!currentClip?.audio_url) {
       toast({
         title: "No Audio",
-        description: `No audio file available for this clip. Debug: clipIndex=${currentClipIndex}, totalClips=${voiceClips.length}`,
+        description: `No audio file available for this clip.`,
         variant: "destructive",
       });
       return;
     }
 
-    console.log('Attempting to play audio:', currentClip.audio_url);
-    
     setIsPlaying(true);
     
     try {
-      // Create or reuse audio element
       if (!audioRef.current) {
         audioRef.current = new Audio();
       }
       
       const audio = audioRef.current;
       
-      // Complete cleanup and reset
       audio.pause();
       audio.currentTime = 0;
       audio.src = '';
-      audio.load(); // This clears the audio element completely
+      audio.load();
       
-      // Set up the audio for the new clip
-      audio.preload = 'metadata'; // Use metadata instead of auto for better performance
-      // Remove crossOrigin - let Supabase handle CORS naturally
+      audio.preload = 'metadata';
       
-      // Create a promise to handle audio loading and playing
       const playAudio = new Promise<void>((resolve, reject) => {
         const onCanPlay = () => {
-          console.log('Audio can play, starting playback');
           audio.removeEventListener('canplay', onCanPlay);
           audio.removeEventListener('error', onError);
           
           audio.play()
-            .then(() => {
-              console.log('Audio playback started successfully');
-              resolve();
-            })
+            .then(() => resolve())
             .catch(reject);
         };
         
         const onError = (e: Event) => {
-          console.error('Audio loading error:', e);
-          console.error('Audio error details:', audio.error);
-          console.error('Audio src that failed:', audio.src);
           audio.removeEventListener('canplay', onCanPlay);
           audio.removeEventListener('error', onError);
           reject(new Error(`Failed to load audio: ${audio.error?.message || 'Unknown error'}`));
@@ -275,22 +230,17 @@ export function VoiceGame() {
         audio.addEventListener('canplay', onCanPlay, { once: true });
         audio.addEventListener('error', onError, { once: true });
         
-        // Set source and start loading
         audio.src = currentClip.audio_url;
       });
       
-      // Set up the ended event listener
       const onEnded = () => {
-        console.log('Audio playback ended');
         setIsPlaying(false);
         audio.removeEventListener('ended', onEnded);
       };
       audio.addEventListener('ended', onEnded, { once: true });
       
-      // Wait for audio to be ready and play
       await playAudio;
       
-      // Update replay count
       if (replaysUsed === 0) {
         // First play is free
       } else {
@@ -320,26 +270,16 @@ export function VoiceGame() {
     }
   };
 
-  const playSound = (type: 'success' | 'error') => {
-    // In a real app, you'd play actual audio files
-    const audio = new Audio();
-    
-    if (type === 'success') {
-      // Success sound frequency
-      console.log('🔊 Success sound');
-    } else {
-      // Error sound frequency  
-      console.log('🔊 Error sound');
-    }
-  };
-
   const handleGuess = (guessedAI: boolean) => {
     if (!currentClip) return;
     const isCorrect = guessedAI === currentClip.is_ai;
     
     if (isCorrect) {
-      // Correct guess
-      setScore(prev => prev + 1);
+      setScore(prev => {
+        setScoreUpdated(true);
+        setTimeout(() => setScoreUpdated(false), 300);
+        return prev + 1;
+      });
       setCurrentStreak(prev => {
         const newStreak = prev + 1;
         setLongestStreak(current => Math.max(current, newStreak));
@@ -347,24 +287,16 @@ export function VoiceGame() {
       });
       setGameHistory(prev => [...prev, true]);
       setShowConfetti(true);
-      playSound('success');
-      
+      setFeedbackState('correct');
 
       setTimeout(() => setShowConfetti(false), 1000);
+      setTimeout(() => setFeedbackState(null), 400);
     } else {
-      // Wrong guess
       setCurrentStreak(0);
       setGameHistory(prev => [...prev, false]);
-      setShakeButton(guessedAI ? 'ai' : 'human');
-      playSound('error');
+      setFeedbackState('incorrect');
       
-      toast({
-        title: "Incorrect",
-        description: `That was a ${currentClip.is_ai ? 'AI' : 'Human'} voice`,
-        variant: "destructive",
-      });
-
-      setTimeout(() => setShakeButton(null), 300);
+      setTimeout(() => setFeedbackState(null), 400);
     }
 
     // Move to next clip or show results
@@ -374,7 +306,6 @@ export function VoiceGame() {
       setTimeout(() => {
         setCurrentClipIndex(prev => prev + 1);
         setReplaysUsed(0);
-        // Auto-play the next clip after a short delay to ensure state has updated
         setTimeout(() => playClip(), 100);
       }, 1000);
     }
@@ -387,117 +318,138 @@ export function VoiceGame() {
     setGameHistory([]);
     setReplaysUsed(0);
     setShowResults(false);
+    setFeedbackState(null);
   };
 
-  const progress = ((currentClipIndex) / totalClips) * 100;
+  // Progress segments for the 10-segment indicator
+  const progressSegments = Array.from({ length: totalClips }, (_, i) => i < currentClipIndex);
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="mb-4">
-            <h1 className="text-4xl font-semibold font-inter text-foreground">
-              Guess the Voice
-            </h1>
-          </div>
-
-          {/* Score & Streak */}
-          <div className="grid grid-cols-3 items-center mb-6 max-w-md mx-auto">
-            {/* Left spacer */}
-            <div></div>
-            
-            {/* Center - Score (fixed position) */}
+    <div className="min-h-screen bg-background">
+      {/* 8-point grid container with generous spacing */}
+      <div className="container mx-auto px-8 py-16 max-w-none">
+        {/* Centered header area */}
+        <header className="text-center mb-16">
+          <h1 className="text-xl md:text-2xl lg:text-xl font-bold text-foreground mb-4 font-inter">
+            Guess the Voice
+          </h1>
+          <div className="flex items-center justify-center gap-8">
             <div className="text-center">
-              <div className="text-2xl font-bold text-primary">{score}</div>
+              <div className={`text-lg font-semibold text-primary ${scoreUpdated ? 'score-update' : ''}`}>
+                {score}
+              </div>
               <div className="text-sm text-muted-foreground">Score</div>
             </div>
-            
-            {/* Right - Streak Badge */}
-            <div className="flex justify-start">
-              {currentStreak > 0 && (
-                <Badge className="streak-badge text-lg px-3 py-1">
-                  <Flame className="h-4 w-4 mr-1" />
-                  {currentStreak}
-                </Badge>
+            <div className="text-center">
+              <div className="text-lg font-semibold text-muted-foreground">
+                {longestStreak}
+              </div>
+              <div className="text-sm text-muted-foreground">Best Streak</div>
+            </div>
+            {currentStreak > 0 && (
+              <div className="flex items-center gap-1 px-3 py-1 bg-gradient-primary rounded-full text-white text-sm font-medium">
+                <Flame className="h-3 w-3" />
+                {currentStreak}
+              </div>
+            )}
+          </div>
+        </header>
+
+        {/* Main game card - centered vertically and horizontally */}
+        <div className="flex justify-center items-center min-h-[400px]">
+          <div className="w-full max-w-md">
+            {/* Progress indicator */}
+            <div className="mb-6">
+              <div className="flex gap-1 mb-2">
+                {progressSegments.map((filled, index) => (
+                  <div
+                    key={index}
+                    className={`progress-segment flex-1 ${
+                      filled ? 'progress-segment-filled' : ''
+                    }`}
+                  />
+                ))}
+              </div>
+              <div className="text-2xs text-muted-foreground text-center">
+                Question {currentClipIndex + 1} of {totalClips}
+              </div>
+            </div>
+
+            {/* Game card with glass effect */}
+            <div className="game-card p-8 slide-up-enter">
+              {/* Large circular play button - centered */}
+              <div className="flex justify-center mb-8">
+                <button
+                  onClick={playClip}
+                  disabled={isPlaying || loading || !currentClip}
+                  className="play-button flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                  aria-label="Play voice clip"
+                >
+                  {isPlaying ? (
+                    <Volume2 className="h-6 w-6 animate-pulse" />
+                  ) : (
+                    <Play className="h-6 w-6 ml-1" />
+                  )}
+                </button>
+              </div>
+
+              {/* Answer buttons - stacked vertically with full width */}
+              <div className="space-y-4">
+                <button
+                  onClick={() => handleGuess(false)}
+                  disabled={isPlaying}
+                  className={`answer-button w-full flex items-center justify-center gap-3 text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed ${
+                    feedbackState === 'incorrect' && !currentClip?.is_ai ? 'answer-button-incorrect' : 
+                    feedbackState === 'correct' && !currentClip?.is_ai ? 'answer-button-correct' : ''
+                  }`}
+                  aria-label="Guess Human (Press H)"
+                >
+                  <User className="h-5 w-5" strokeWidth={1.5} />
+                  <div className="flex flex-col items-start">
+                    <span>Human</span>
+                    <span className="text-xs text-muted-foreground font-normal">Press H</span>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => handleGuess(true)}
+                  disabled={isPlaying}
+                  className={`answer-button w-full flex items-center justify-center gap-3 text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed ${
+                    feedbackState === 'incorrect' && currentClip?.is_ai ? 'answer-button-incorrect' : 
+                    feedbackState === 'correct' && currentClip?.is_ai ? 'answer-button-correct' : ''
+                  }`}
+                  aria-label="Guess AI (Press A)"
+                >
+                  <Bot className="h-5 w-5" strokeWidth={1.5} />
+                  <div className="flex flex-col items-start">
+                    <span>AI</span>
+                    <span className="text-xs text-muted-foreground font-normal">Press A</span>
+                  </div>
+                </button>
+              </div>
+
+              {/* Replay counter */}
+              {replaysUsed > 0 && (
+                <div className="text-2xs text-muted-foreground text-center mt-6">
+                  Replays used: {replaysUsed}/{maxReplays}
+                </div>
               )}
             </div>
           </div>
         </div>
 
-        {/* Game Area */}
-        <Card className="p-6 shadow-card mb-6">
-          {/* Question Counter Badge */}
-          <div className="flex justify-end mb-4">
-            <Badge variant="outline" className="text-sm px-3 py-1">
-              Question {currentClipIndex + 1} of {totalClips}
-            </Badge>
+        {/* Loading state */}
+        {loading && (
+          <div className="text-center text-muted-foreground">
+            Loading voice clips...
           </div>
-
-          {/* Main Game Grid */}
-          <div className="grid grid-cols-2 gap-8 items-center">
-            {/* Left Side - Play Button */}
-            <div className="flex flex-col items-center justify-center">
-              <Button
-                onClick={playClip}
-                disabled={isPlaying || loading || !currentClip}
-                size="lg"
-                className="w-20 h-20 rounded-full bg-gradient-primary hover:scale-105 transition-transform shadow-game"
-              >
-                {isPlaying ? (
-                  <Volume2 className="h-6 w-6 animate-pulse" />
-                ) : (
-                  <Play className="h-6 w-6" />
-                )}
-              </Button>
-              <p className="text-xs text-muted-foreground mt-2 text-center">
-                Click to play
-              </p>
-            </div>
-
-            {/* Right Side - Choice Buttons */}
-            <div className="flex flex-col gap-3">
-              <Button
-                onClick={() => handleGuess(false)}
-                size="lg"
-                variant="outline"
-                className={`w-full h-16 text-base font-semibold border-2 hover:bg-accent hover:text-accent-foreground flex items-center justify-center gap-2 ${
-                  shakeButton === 'human' ? 'shake-animation border-destructive' : ''
-                }`}
-                disabled={isPlaying}
-              >
-                <User className="h-5 w-5" />
-                <div className="flex flex-col items-start">
-                  <span>Human</span>
-                  <span className="text-xs text-muted-foreground font-normal">Press H</span>
-                </div>
-              </Button>
-
-              <Button
-                onClick={() => handleGuess(true)}
-                size="lg"
-                variant="outline"
-                className={`w-full h-16 text-base font-semibold border-2 hover:bg-accent hover:text-accent-foreground flex items-center justify-center gap-2 ${
-                  shakeButton === 'ai' ? 'shake-animation border-destructive' : ''
-                }`}
-                disabled={isPlaying}
-              >
-                <Bot className="h-5 w-5" />
-                <div className="flex flex-col items-start">
-                  <span>AI</span>
-                  <span className="text-xs text-muted-foreground font-normal">Press A</span>
-                </div>
-              </Button>
-            </div>
-          </div>
-        </Card>
-
+        )}
       </div>
 
-      {/* Confetti Effect */}
+      {/* Confetti effect */}
       {showConfetti && <Confetti />}
 
-      {/* Results Modal */}
+      {/* Results modal */}
       <ResultsModal
         isOpen={showResults}
         onClose={() => setShowResults(false)}
